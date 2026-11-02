@@ -1,0 +1,53 @@
+---
+import Logo from './Logo.astro';
+import { site, nav, attorneys } from '../data/site';
+
+const photo = (file: string, title: string) =>
+  `<a href="https://commons.wikimedia.org/wiki/File:${file}">“${title}”</a>`;
+---
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="foot-logo" href="/"><Logo /></a>
+      <nav aria-label="Alt menü">
+        <ul>{nav.map((n) => <li><a class="link" href={n.href}>{n.label}</a></li>)}</ul>
+      </nav>
+    </div>
+    <div class="foot-mid">
+      {attorneys.map((a) => (
+        <p>{a.name} · <a class="link" href={a.phoneHref}>{a.phone}</a></p>
+      ))}
+      <p><a class="link" href={`mailto:${site.email}`}>{site.email}</a> · <a class="link" href={site.mapsHref}>{site.address}</a></p>
+    </div>
+    <div class="foot-bot">
+      <p>
+        © {new Date().getFullYear()} {site.name}. Bu sitedeki bilgiler genel bilgilendirme amaçlıdır, hukuki danışmanlık yerine geçmez.
+        Fotoğraflar: <Fragment set:html={[
+          photo('View_of_Alanya_Shipyard_from_Red_Tower,_2024.jpg', 'View of Alanya Shipyard from Red Tower'),
+          photo('View_of_the_Sea_from_Alanya_Castle,_Alanya,_T%C3%BCrkiye.jpg', 'View of the Sea from Alanya Castle'),
+        ].join(', ')} />, Julian Lupyan, CC0.
+      </p>
+      <p class="foot-legal"><a class="link" href="/kvkk">KVKK</a> · <a class="link" href="/yasal-uyari">Yasal uyarı</a></p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot { background: var(--paper); color: var(--ink); padding-block: 56px 28px; }
+  .foot-top { display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap; }
+  .foot-logo { display: block; width: 150px; color: var(--accent); }
+  .foot-logo :global(svg) { width: 100%; height: auto; }
+  .foot-top ul { display: flex; flex-wrap: wrap; gap: 12px 30px; font-size: var(--step-s); font-weight: 500; }
+  .foot-mid { margin-top: 32px; display: grid; gap: 4px; color: var(--muted); font-size: 16px; }
+  .foot-mid a { text-decoration-color: transparent; }
+  .foot-bot {
+    margin-top: 40px; display: flex; justify-content: space-between; align-items: end; gap: 32px;
+    font-size: var(--step-s); color: var(--muted);
+  }
+  .foot-bot p:first-child { max-width: 70ch; }
+  .foot-bot :global(a) { color: inherit; }
+  .foot-legal { white-space: nowrap; }
+  @media (max-width: 700px) {
+    .foot-bot { flex-direction: column; align-items: start; }
+  }
+</style>

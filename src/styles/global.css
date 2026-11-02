@@ -1,0 +1,114 @@
+@import '@fontsource-variable/cormorant-garamond/wght.css';
+@import '@fontsource-variable/jost/wght.css';
+
+:root {
+  /* Palette (brand, fixed) */
+  --bg: #FBF8F3;
+  --ink: #1F1A17;
+  --muted: #5E554D;
+  --accent: #590907;
+  --accent-strong: #3F0605;
+  --surface: #E8D2B5;
+  --sage: #A5A79B;
+  --on-accent: #FFFFFF;
+  --paper: #F3EBDD;
+
+  /* Type: two faces, five sizes */
+  --display: 'Cormorant Garamond Variable', Garamond, 'Times New Roman', serif;
+  --text: 'Jost Variable', 'Avenir Next', system-ui, sans-serif;
+  --step-monument: clamp(76px, 13.5vw, 240px);
+  --step-xl: clamp(44px, 5.1vw, 74px);
+  --step-l: clamp(28px, 3.2vw, 46px);
+  --step-body: 17px;
+  --step-s: 14px;
+
+  /* Frame */
+  --margin: clamp(16px, 2.2vw, 32px);
+  --section-gap: clamp(112px, 14vw, 220px);
+
+  /* Motion */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --t-hover: 220ms;
+  --t-press: 120ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 var(--step-body)/1.55 var(--text);
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img, video, svg { display: block; max-width: 100%; }
+h1, h2, h3, p, ul, ol, dl, dd, figure, blockquote { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+a { color: inherit; }
+::selection { background: var(--accent); color: var(--on-accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.display {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.04;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip {
+  position: absolute; left: var(--margin); top: -60px; z-index: 50;
+  background: var(--accent); color: var(--on-accent); padding: 10px 16px; text-decoration: none;
+}
+.skip:focus { top: 12px; }
+
+/* 12-column grid inside equal outer margins */
+.wrap { padding-inline: var(--margin); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(12px, 1.6vw, 24px);
+}
+
+/* Controls */
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: .6em;
+  min-height: 48px; padding: 0 26px;
+  background: var(--accent); color: var(--on-accent);
+  font: 500 var(--step-body)/1 var(--text); text-decoration: none;
+  border: 0; border-radius: 0; cursor: pointer;
+  transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease;
+}
+.button:active { transform: scale(.97); }
+.button.ghost { background: transparent; color: inherit; box-shadow: inset 0 0 0 1.5px currentColor; }
+.button.light { background: var(--bg); color: var(--accent); }
+.link {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: .22em;
+  text-decoration-thickness: .07em;
+  transition: text-decoration-color var(--t-hover) ease, color var(--t-hover) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .button:hover { background: var(--accent-strong); }
+  .button.ghost:hover { background: rgb(251 248 243 / .12); }
+  .button.light:hover { background: var(--surface); }
+  .link:hover { text-decoration-color: currentColor; }
+}
+
+/* Entrances: content is visible unless the script has run and the element has not yet entered. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-rise] {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 80ms);
+  }
+  .js [data-rise].is-in { opacity: 1; transform: none; }
+
+}

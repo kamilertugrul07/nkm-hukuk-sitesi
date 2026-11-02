@@ -1,0 +1,19 @@
+---
+// Temporary page body for sections whose content is planned in the next step.
+import Base from '../layouts/Base.astro';
+interface Props { title: string; lead: string }
+const { title, lead } = Astro.props;
+---
+<Base title={`${title} · NKM Hukuk Bürosu`} description={lead}>
+  <section class="stub wrap">
+    <h1 class="display">{title}</h1>
+    <p>{lead}</p>
+    <a class="button" href="/">Ana sayfaya dön</a>
+  </section>
+</Base>
+<style>
+  .stub { min-height: 80svh; padding-top: 180px; display: grid; align-content: start; gap: 28px; }
+  h1 { font-size: var(--step-xl); color: var(--accent); }
+  p { max-width: 52ch; }
+  .button { justify-self: start; }
+</style>

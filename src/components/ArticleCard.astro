@@ -1,0 +1,48 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { readingMinutes, formatDate } from '../lib/articles';
+
+interface Props { article: CollectionEntry<'makaleler'>; large?: boolean }
+const { article, large = false } = Astro.props;
+const a = article.data;
+---
+<article class:list={['acard', { large }]} data-area={a.area}>
+  <a href={`/makaleler/${article.id}`}>
+    <div class="acard-ph">
+      <Image
+        src={a.cover} alt={a.coverAlt} quality={72}
+        widths={large ? [600, 900, 1200] : [400, 640, 800]}
+        sizes={large ? '(max-width: 900px) 92vw, 55vw' : '(max-width: 600px) 92vw, (max-width: 1000px) 46vw, 30vw'}
+      />
+    </div>
+    <div class="acard-body">
+      <h3 class="display">{a.title}</h3>
+      {large && <p class="acard-desc">{a.description}</p>}
+      <p class="acard-meta"><span class="acard-area">{a.area}</span> · {formatDate(a.date)} · {readingMinutes(article.body ?? '')} dk okuma</p>
+    </div>
+  </a>
+</article>
+
+<style>
+  .acard > a { display: block; color: inherit; text-decoration: none; }
+  .acard-ph { overflow: hidden; }
+  .acard-ph img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; transition: transform 700ms var(--ease-out); }
+  .acard-body { padding-top: 18px; display: grid; gap: 8px; }
+  .acard-area { color: var(--accent); font-weight: 600; }
+  .acard h3 { font-size: 28px; line-height: 1.12; }
+  .acard-desc { color: var(--muted); max-width: 54ch; }
+  .acard-meta { color: var(--muted); font-size: 16px; }
+  @media (hover: hover) and (pointer: fine) {
+    .acard > a:hover img { transform: scale(1.04); }
+    .acard > a:hover h3 { color: var(--accent); }
+  }
+  .large > a { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(28px, 4vw, 56px); align-items: center; }
+  .large .acard-ph img { aspect-ratio: 3 / 2; }
+  .large .acard-body { padding-top: 0; gap: 14px; }
+  .large h3 { font-size: var(--step-l); }
+  @media (max-width: 900px) {
+    .large > a { grid-template-columns: 1fr; }
+    .large .acard-body { padding-top: 6px; }
+  }
+</style>

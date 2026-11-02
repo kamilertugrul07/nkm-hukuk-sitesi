@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+
+const areas = (await getCollection('alanlar')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base
+  title="Çalışma Alanları · NKM Hukuk Bürosu"
+  description="Alanya'da icra ve iflas, aile, ceza, iş, gayrimenkul ve tapu, yabancılar ile kat mülkiyeti ve site yönetimi alanlarında avukatlık ve danışmanlık."
+>
+  <section class="head wrap">
+    <h1 class="display" data-rise>Çalışma alanlarımız</h1>
+    <p data-rise style="--i:1">
+      Alanya’daki büromuzdan tüm Türkiye’de sekiz alanda avukatlık ve danışmanlık hizmeti veriyoruz. Her alanda hangi konularda yardımcı
+      olduğumuzu, sürecin nasıl işlediğini ve sık sorulan soruları ilgili sayfada bulabilirsiniz.
+    </p>
+  </section>
+
+  <section class="list wrap" aria-label="Alanlar">
+    {areas.map((a, i) => (
+      <article class="item" data-rise style={`--i:${i % 2}`}>
+        <a class="item-ph" href={`/calisma-alanlari/${a.id}`} tabindex="-1" aria-hidden="true">
+          <Image src={a.data.image} alt="" widths={[300, 560]} sizes="(max-width: 560px) 150px, 280px" quality={72} loading={i < 4 ? 'eager' : 'lazy'} />
+        </a>
+        <div class="item-copy">
+          <h2 class="display"><a href={`/calisma-alanlari/${a.id}`}>{a.data.name}</a></h2>
+          <p>{a.data.summary}</p>
+          <ul>{a.data.services.slice(0, 3).map((s) => <li>{s.title}</li>)}</ul>
+          <a class="item-more" href={`/calisma-alanlari/${a.id}`}>Ayrıntılar →</a>
+        </div>
+      </article>
+    ))}
+    <div class="item-cta" data-rise style="--i:1">
+      <h2 class="display">Nereden başlayacağınızı bilmiyor musunuz?</h2>
+      <p>Durumunuzu kısaca anlatın; ilk adımı birlikte atalım.</p>
+      <a class="button light" href="/#iletisim">Randevu alın</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head { padding-block: clamp(32px, 4vw, 64px) clamp(32px, 4vw, 48px); }
+  .head h1 { font-size: var(--step-xl); color: var(--accent); }
+  .head p { margin-top: 18px; max-width: 60ch; font-size: 20px; }
+
+  .list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-bottom: clamp(72px, 9vw, 130px); }
+  .item { display: grid; grid-template-columns: 260px 1fr; gap: 26px; background: var(--paper); padding: 16px; align-items: stretch; }
+  .item-ph { display: block; overflow: hidden; }
+  .item-ph img { width: 100%; height: 100%; min-height: 300px; aspect-ratio: 4 / 5; object-fit: cover; transition: transform 700ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .item:hover .item-ph img { transform: scale(1.04); } }
+  .item-copy { padding: 8px 8px 8px 0; display: grid; gap: 10px; align-content: start; }
+  .item h2 { font-size: 28px; line-height: 1.1; }
+  .item h2 a { color: var(--accent); text-decoration: none; }
+  .item-copy > p { font-size: 16px; }
+  .item ul { display: grid; gap: 4px; font-size: 15px; }
+  .item li { padding-left: 1.1em; position: relative; color: var(--muted); }
+  .item li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
+  .item-more { justify-self: start; margin-top: 4px; color: var(--accent); font-weight: 600; text-decoration: none; }
+  @media (hover: hover) and (pointer: fine) { .item-more:hover { text-decoration: underline; text-underline-offset: .2em; } }
+
+  .item-cta {
+    grid-column: 1 / -1; background: var(--accent); color: var(--bg); padding: 30px 36px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 8px 32px; align-items: center;
+  }
+  @media (max-width: 900px) { .item-cta { grid-template-columns: 1fr; justify-items: start; gap: 14px; } }
+  .item-cta h2 { font-size: 30px; }
+  .item-cta p { color: #ecdccb; max-width: 42ch; }
+
+  @media (max-width: 1180px) and (min-width: 1001px) { .item { grid-template-columns: 210px 1fr; } }
+  @media (max-width: 1000px) { .list { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) {
+    .item { grid-template-columns: 140px 1fr; gap: 16px; padding: 12px; }
+    .item-ph img { min-height: 0; }
+    .item h2 { font-size: 24px; }
+    .item ul { display: none; }
+  }
+</style>

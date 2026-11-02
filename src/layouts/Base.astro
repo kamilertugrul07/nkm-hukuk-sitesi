@@ -1,0 +1,91 @@
+---
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+import Footer from '../components/Footer.astro';
+import { nav } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** The header sits over a dark hero photograph in light ink. */
+  overlay?: boolean;
+}
+const { title, description, overlay = false } = Astro.props;
+---
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#590907" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="tr_TR" />
+    <script is:inline>document.documentElement.classList.add('js')</script>
+  </head>
+  <body>
+    <a class="skip" href="#icerik">İçeriğe geç</a>
+    <header class:list={['top wrap', { overlay }]}>
+      <a class="top-logo" href="/"><Logo /></a>
+      <nav aria-label="Ana menü" class="top-nav">
+        <ul>{nav.map((n) => <li><a class="link" href={n.href}>{n.label}</a></li>)}</ul>
+      </nav>
+      <details class="mnav">
+        <summary>Menü</summary>
+        <ul>{nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul>
+      </details>
+    </header>
+    <main id="icerik">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // Entrances: each [data-rise] element is revealed once as it enters the viewport.
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+        }
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.1 });
+      document.querySelectorAll('[data-rise]').forEach((t) => io.observe(t));
+      // Close the phone menu after choosing a link on the same page.
+      document.querySelectorAll<HTMLAnchorElement>('.mnav a').forEach((a) =>
+        a.addEventListener('click', () => a.closest('details')?.removeAttribute('open')));
+    </script>
+  </body>
+</html>
+
+<style>
+  .top {
+    position: relative; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    padding-block: 24px; color: var(--ink);
+  }
+  .top.overlay { position: absolute; inset: 0 0 auto 0; color: var(--bg); }
+  .top-logo { display: block; width: 168px; color: var(--accent); }
+  .overlay .top-logo { color: var(--bg); }
+  .top-logo :global(svg) { width: 100%; height: auto; }
+  .top-nav ul { display: flex; gap: clamp(18px, 2.2vw, 34px); font-size: var(--step-s); font-weight: 500; }
+  .mnav { display: none; position: relative; }
+  .mnav summary {
+    list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center;
+    padding: 0 16px; font-weight: 500; box-shadow: inset 0 0 0 1.5px currentColor;
+  }
+  .mnav summary::-webkit-details-marker { display: none; }
+  .mnav:not([open]) ul { display: none; }
+  .mnav ul {
+    position: absolute; right: 0; top: calc(100% + 8px); min-width: 240px;
+    background: var(--bg); color: var(--ink); padding: 10px 0;
+  }
+  .mnav li a { display: block; padding: 12px 22px; text-decoration: none; font-weight: 500; }
+  .mnav li a:hover { background: var(--paper); color: var(--accent); }
+  @media (max-width: 1000px) {
+    .top-nav { display: none; }
+    .mnav { display: block; }
+    .top-logo { width: 130px; }
+  }
+</style>

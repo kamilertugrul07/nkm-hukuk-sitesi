@@ -1,0 +1,167 @@
+---
+import { render, getCollection, type CollectionEntry } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticles, readingMinutes, formatDate } from '../../lib/articles';
+import { site } from '../../data/site';
+
+export async function getStaticPaths() {
+  const all = await getArticles();
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<'makaleler'> }
+const { entry } = Astro.props;
+const a = entry.data;
+const { Content, headings } = await render(entry);
+const toc = headings.filter((h) => h.depth === 2);
+
+const petitions = (await getCollection('dilekceler')).filter((d) => a.related.includes(d.id));
+const others = (await getArticles()).filter((x) => x.id !== entry.id).slice(0, 3);
+
+// Article structured data for search engines.
+const cover = await getImage({ src: a.cover, width: 1200, format: 'jpg', quality: 75 });
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: a.title,
+  description: a.description,
+  datePublished: a.date.toISOString(),
+  dateModified: (a.updated ?? a.date).toISOString(),
+  author: { '@type': 'Organization', name: a.author },
+  publisher: { '@type': 'LegalService', name: site.name, address: site.city },
+  image: new URL(cover.src, Astro.site ?? 'https://nkmhukuk.com').toString(),
+  inLanguage: 'tr-TR',
+};
+---
+<Base title={`${a.title} · NKM Hukuk Bürosu`} description={a.description}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <article class="wrap art">
+    <header class="art-head" data-rise>
+      <nav class="crumbs" aria-label="Konum">
+        <a class="link" href="/makaleler">Makaleler</a> <span aria-hidden="true">/</span> {a.area}
+      </nav>
+      <h1 class="display">{a.title}</h1>
+      <p class="lead">{a.description}</p>
+      <p class="meta">{a.author} · {formatDate(a.date)} · {readingMinutes(entry.body ?? '')} dk okuma</p>
+    </header>
+
+    <figure class="cover" data-rise style="--i:1">
+      <Image src={a.cover} alt={a.coverAlt} widths={[700, 1100, 1600]} sizes="(max-width: 1200px) 96vw, 1200px" quality={74} loading="eager" />
+    </figure>
+
+    <div class="art-grid">
+      {toc.length > 2 && (
+        <aside class="toc" aria-labelledby="toc-title">
+          <p id="toc-title" class="toc-k">İçindekiler</p>
+          <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+        </aside>
+      )}
+
+      <div class="body">
+        <div class="prose"><Content /></div>
+
+        {petitions.length > 0 && (
+          <section class="rel" aria-labelledby="rel-title">
+            <h2 id="rel-title" class="display">İlgili dilekçe örnekleri</h2>
+            <ul>
+              {petitions.map((p) => (
+                <li>
+                  <a href={`/dilekce-ornekleri/${p.id}`}>
+                    <span class="rel-title display">{p.data.title}</span>
+                    <span class="rel-time">Süre: {p.data.deadline.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <p class="disclaimer">
+          Bu yazı genel bilgilendirme amaçlıdır ve hukuki danışmanlık yerine geçmez. Mevzuat ve içtihat değişebilir;
+          kendi durumunuz için bir avukata danışmanız önerilir.
+        </p>
+
+        <div class="help">
+          <h2 class="display">Bu konuda danışmak ister misiniz?</h2>
+          <p>Durumunuzu kısaca anlatın; süreleriniz dolmadan doğru adımı birlikte belirleyelim.</p>
+          <a class="button light" href="/#iletisim">Görüşme talep edin</a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  {others.length > 0 && (
+    <section class="more wrap" aria-labelledby="more-title">
+      <h2 id="more-title" class="display">Diğer yazılar</h2>
+      <div class="more-grid">{others.map((o) => <ArticleCard article={o} />)}</div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .art { padding-top: clamp(28px, 4vw, 56px); }
+  .crumbs { font-size: var(--step-s); color: var(--muted); }
+  .crumbs a { color: var(--accent); text-decoration-color: transparent; }
+  .art-head { max-width: 920px; }
+  .art-head h1 { margin-top: 22px; font-size: var(--step-xl); color: var(--accent); }
+  .lead { margin-top: 18px; font-size: 20px; max-width: 62ch; }
+  .meta { margin-top: 16px; color: var(--muted); font-size: var(--step-s); }
+  .cover { margin: clamp(32px, 4vw, 56px) 0; }
+  .cover img { width: 100%; height: auto; aspect-ratio: 21 / 9; object-fit: cover; }
+
+  .art-grid { display: grid; grid-template-columns: 260px minmax(0, 720px); gap: clamp(32px, 5vw, 96px); justify-content: center; padding-bottom: var(--section-gap); }
+  .toc { position: sticky; top: 24px; align-self: start; }
+  .toc-k { font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+  .toc ol { display: grid; gap: 10px; list-style: none; padding: 0; font-size: 16px; }
+  .toc a { color: var(--muted); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  /* Article typography */
+  .prose { font-size: 18px; line-height: 1.75; }
+  .prose :global(p) { margin: 0 0 1.1em; }
+  .prose :global(h2) { font: 600 34px/1.15 var(--display); color: var(--accent); margin: 1.8em 0 .6em; scroll-margin-top: 24px; }
+  .prose :global(ul), .prose :global(ol) { margin: 0 0 1.2em; padding-left: 1.3em; display: grid; gap: .45em; }
+  .prose :global(ul) { list-style: disc; }
+  .prose :global(ol) { list-style: decimal; }
+  .prose :global(li::marker) { color: var(--accent); }
+  .prose :global(a) { color: var(--accent); text-underline-offset: .18em; }
+  .prose :global(strong) { font-weight: 600; }
+  .prose :global(blockquote) {
+    margin: 1.6em 0; padding: 20px 24px; background: #fdecea; border-left: 6px solid #b3261e; color: #5c1410;
+  }
+  .prose :global(blockquote p) { margin: 0; }
+
+  .rel { margin-top: 48px; }
+  .rel h2 { font-size: 34px; color: var(--accent); margin-bottom: 14px; }
+  .rel ul { display: grid; gap: 10px; }
+  .rel a { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: var(--paper); padding: 18px 22px; text-decoration: none; color: var(--ink); }
+  .rel-title { font-size: 26px; }
+  .rel-time { flex: none; background: #fdecea; color: #8c1d16; font-weight: 600; font-size: var(--step-s); padding: 6px 10px; border-left: 4px solid #b3261e; }
+  @media (hover: hover) and (pointer: fine) { .rel a:hover .rel-title { color: var(--accent); } }
+
+  .disclaimer { margin-top: 40px; font-size: var(--step-s); color: var(--muted); }
+  .help { margin-top: 40px; background: var(--accent); color: var(--bg); padding: clamp(28px, 4vw, 44px); display: grid; gap: 14px; justify-items: start; }
+  .help h2 { font-size: var(--step-l); }
+  .help p { color: #ecdccb; }
+
+  .more { padding-bottom: var(--section-gap); }
+  .more h2 { font-size: var(--step-l); color: var(--accent); margin-bottom: 32px; }
+  .more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+
+  @media (max-width: 1000px) {
+    .art-grid { grid-template-columns: minmax(0, 1fr); }
+    .toc { position: static; background: var(--paper); padding: 22px 24px; }
+    .more-grid { grid-template-columns: 1fr 1fr; }
+    .cover img { aspect-ratio: 3 / 2; }
+  }
+  @media (max-width: 600px) {
+    .more-grid { grid-template-columns: 1fr; }
+    .prose { font-size: 17px; }
+    .prose :global(h2) { font-size: 28px; }
+    .art-head h1 { font-size: 34px; }
+    .rel-title { font-size: 20px; }
+    .rel a { flex-direction: column; align-items: start; }
+  }
+</style>

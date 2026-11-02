@@ -1,0 +1,11 @@
+---
+// The firm's own logo (NKM over HUKUK BÜROSU, traced from brand/logo-kendi/logo-src.png) as inline SVG
+// in the current text colour.
+import raw from '../assets/logo/nkm-logo.svg?raw';
+
+interface Props { class?: string }
+const { class: className } = Astro.props;
+const svg = raw
+  .replace('<svg ', '<svg role="img" aria-label="NKM Hukuk Bürosu" focusable="false" ');
+---
+<span class={className} set:html={svg} />

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NKM · Başlık Yazı Tipi Seçenekleri</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="../../node_modules/@fontsource-variable/bodoni-moda/opsz.css">
+<link rel="stylesheet" href="../../node_modules/@fontsource-variable/jost/wght.css">
+<style>
+  :root{--bg:#FBF8F3;--ink:#1F1A17;--muted:#5E554D;--wine:#590907;--paper:#F3EBDD;--gold:#C9A45C;--text:'Jost Variable',system-ui,sans-serif}
+  *{box-sizing:border-box}body{margin:0;background:#2a2421;font:400 17px/1.6 var(--text);color:var(--ink)}
+  h1,h2,h3,p{margin:0}
+  .label{color:#fff;padding:56px 40px 18px;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+  .label b{font:600 34px/1 var(--text);color:var(--gold)}
+  .label span{font-size:20px}.label small{opacity:.7;font-size:15px}
+  .opt{max-width:1440px;margin:0 auto}
+  .hero{position:relative;height:640px;background:#1d120e url(img/hero.jpg) center/cover;color:var(--bg);display:flex;align-items:center}
+  .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgb(20 10 8/.7) 0%,rgb(20 10 8/0) 22%),linear-gradient(90deg,rgb(20 10 8/.84) 0%,rgb(20 10 8/.58) 46%,rgb(20 10 8/0) 78%)}
+  .hero .logo{position:absolute;top:26px;left:32px;width:290px}
+  .copy{position:relative;padding:60px 32px 0;max-width:1080px}
+  .copy h1{font-family:var(--f);font-weight:var(--w);font-size:var(--s,78px);line-height:1.06;letter-spacing:var(--ls,-.01em);text-transform:var(--tt,none)}
+  .copy p{margin:24px 0 34px;font-size:20px;max-width:34ch;color:#efe4d6}
+  .btns{display:flex;gap:14px}
+  .btn{display:inline-flex;align-items:center;min-height:52px;padding:0 26px;background:var(--wine);color:#fff;font-weight:500}
+  .btn.g{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
+  .light{background:var(--bg);padding:56px 32px;display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:end}
+  .light h2{font-family:var(--f);font-weight:var(--w);font-size:var(--s2,66px);line-height:1.06;color:var(--wine);letter-spacing:var(--ls,-.01em);text-transform:var(--tt,none)}
+  .light h3{font-family:var(--f);font-weight:var(--w);font-size:28px;color:var(--wine);text-transform:var(--tt,none)}
+  .light .tr{font-family:var(--f);font-weight:var(--w);font-size:30px;color:var(--ink);margin-top:10px}
+  .light ul{margin:8px 0 0;padding:0;list-style:none;color:var(--muted)}
+</style>
+</head>
+<body>
+<template id="t">
+  <div class="opt">
+    <section class="hero">
+      <img class="logo" src="img/nkm-logo-yatay-krem.svg" alt="">
+      <div class="copy">
+        <h1>Hukuki süreçlerinizde Alanya’da yanınızdayız.</h1>
+        <p>İcra, aile, ceza, iş, gayrimenkul, yabancılar ve kat mülkiyeti hukukunda avukatlık ve danışmanlık.</p>
+        <div class="btns"><span class="btn">Görüşme talep edin</span><span class="btn g">Ücretsiz dilekçe örnekleri</span></div>
+      </div>
+    </section>
+    <section class="light">
+      <div><h2>Çalışma alanlarımız</h2><p class="tr">İĞÜŞÖÇ ığüşöç — Son gününüzü hesaplayın</p></div>
+      <div><h3>Gayrimenkul ve Tapu</h3><ul><li>Tapu iptali ve tescil</li><li>Ortaklığın giderilmesi</li><li>Kira ve tahliye</li></ul></div>
+    </section>
+  </div>
+</template>
+<div id="list"></div>
+<script>
+  const opts = [
+    ['Şu an', 'Bodoni Moda 600', 'Mevcut başlık yazı tipi (karşılaştırma için)', "'Bodoni Moda Variable'", 600, {}],
+    ['Y1', 'Cormorant Garamond 600', 'Moda ve lüks dergi zarafeti; Bodoni’den daha dolgun', "'Cormorant Garamond Variable'", 600, { s: '88px', s2: '74px' }],
+    ['Y2', 'EB Garamond 600', 'Klasik kitap ve hukuk geleneği; en okunaklı', "'EB Garamond Variable'", 600, {}],
+    ['Y3', 'Cinzel 600', 'Roma yazıtı büyük harfleri; anıtsal (başlıklar büyük harf)', "'Cinzel Variable'", 600, { s: '58px', s2: '54px', tt: 'uppercase', ls: '.02em' }],
+    ['Y4', 'Marcellus', 'Eşit kalınlıkta çizgiler; sakin lüks (otel ve mücevher markaları)', "'Marcellus'", 400, { s: '74px' }],
+    ['Y5', 'Libre Baskerville 700', 'Sağlam ve ağırbaşlı; kurumsal hukuk havası', "'Libre Baskerville'", 700, { s: '64px', s2: '56px' }],
+  ];
+  const t = document.getElementById('t'), list = document.getElementById('list');
+  for (const [code, name, desc, fam, w, v] of opts) {
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.innerHTML = `<b>${code}</b><span>${name}</span><small>${desc}</small>`;
+    const node = t.content.firstElementChild.cloneNode(true);
+    node.style.setProperty('--f', fam);
+    node.style.setProperty('--w', w);
+    for (const [k, val] of Object.entries(v)) node.style.setProperty('--' + k, val);
+    list.append(label, node);
+  }
+</script>
+</body>
+</html>

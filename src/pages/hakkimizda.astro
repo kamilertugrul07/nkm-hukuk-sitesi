@@ -1,0 +1,146 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { site, attorneys, hours } from '../data/site';
+import tersane from '../assets/img/tersane.jpg';
+import kaleDeniz from '../assets/img/kale-deniz.jpg';
+
+const principles = [
+  ['Ayrıntıya özen', 'Bir tarih, bir imza, bir virgül. Dosyanızdaki hiçbir ayrıntıyı önemsiz saymayız.'],
+  ['Süreye saygı', 'Hukukta hak, süreyle korunur. Dosyanızın tüm sürelerini ilk gün belirleriz.'],
+  ['Şeffaf ücret', 'Avukatlık ücretini ve masrafları işe başlamadan, yazılı olarak bildiririz.'],
+  ['Sır saklama', 'Bize anlattıklarınız avukatlık sırrıdır; yalnızca dosyanız için kullanılır.'],
+];
+---
+<Base
+  title="Hakkımızda · NKM Hukuk Bürosu"
+  description="NKM Hukuk Bürosu, Alanya'da Av. Niyazi Kağan Mısırlıoğlu ve Av. Kamil Ertuğrul Mısırlıoğlu ortaklığında kurulan ve tüm Türkiye'de hizmet veren avukatlık bürosudur."
+>
+  <section class="intro wrap">
+    <div class="intro-copy" data-rise>
+      <h1 class="display">Hakkımızda</h1>
+      <p class="lead">
+        NKM Hukuk Bürosu, Alanya’da Av. Niyazi Kağan Mısırlıoğlu ve Av. Kamil Ertuğrul Mısırlıoğlu ortaklığında kurulan ve
+        tüm Türkiye’de hizmet veren avukatlık bürosudur.
+      </p>
+      <p>
+        İcra ve iflas, aile, ceza, iş, gayrimenkul ve tapu, yabancılar, kat mülkiyeti ve site yönetimi ile trafik kazası ve
+        sigorta alanlarında bireylere, yabancı uyruklu müvekkillere, site yönetimlerine ve işletmelere avukatlık ve
+        danışmanlık hizmeti veriyoruz. Dosyalarımızı ilk görüşmeden sonuçlanıncaya kadar doğrudan kendimiz takip ediyoruz.
+      </p>
+    </div>
+    <figure class="intro-ph" data-rise style="--i:1">
+      <Image src={tersane} alt="Kızıl Kule’den Alanya Tersanesi ve kıyıya bakış" widths={[500, 800, 1100]} sizes="(max-width: 900px) 92vw, 42vw" quality={72} loading="eager" />
+    </figure>
+  </section>
+
+  <section class="team wrap" aria-labelledby="team-title">
+    <h2 id="team-title" class="display sec" data-rise>Avukatlarımız</h2>
+    <div class="team-grid">
+      {attorneys.map((a, i) => (
+        <article class="person" data-rise style={`--i:${i}`}>
+          <div class="person-ph" aria-hidden="true"><span class="display">{a.initials}</span></div>
+          <div class="person-copy">
+            <h3 class="display">{a.name}</h3>
+            <p class="person-bar">{a.bar} · Sicil No: {a.sicil}</p>
+            <dl>
+              <div><dt>Eğitim</dt><dd>{a.education}</dd></div>
+              <div><dt>Diller</dt><dd>{a.languages}</dd></div>
+              <div><dt>Telefon</dt><dd><a class="link" href={a.phoneHref}>{a.phone}</a></dd></div>
+            </dl>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="principles" aria-labelledby="pr-title">
+    <div class="wrap">
+      <h2 id="pr-title" class="display sec" data-rise>Çalışma ilkelerimiz</h2>
+      <ul class="pr-grid">
+        {principles.map(([t, d], i) => (
+          <li data-rise style={`--i:${i}`}>
+            <h3 class="display">{t}</h3>
+            <p>{d}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="office wrap" aria-labelledby="of-title">
+    <figure class="office-ph" data-rise>
+      <Image src={kaleDeniz} alt="Alanya Kalesi’nden Akdeniz’e bakış" widths={[500, 800]} sizes="(max-width: 900px) 92vw, 40vw" quality={72} />
+    </figure>
+    <div class="office-copy" data-rise style="--i:1">
+      <h2 id="of-title" class="display sec">Büromuz</h2>
+      <dl>
+        <div><dt>Adres</dt><dd>{site.address}</dd></div>
+        <div><dt>Çalışma saatleri</dt><dd>{hours}</dd></div>
+        <div><dt>E-posta</dt><dd><a class="link" href={`mailto:${site.email}`}>{site.email}</a></dd></div>
+      </dl>
+      <p class="office-note">Görüşmelerimizi büromuzda ya da çevrim içi yapabiliriz. Lütfen gelmeden önce randevu alın.</p>
+      <div class="office-actions">
+        <a class="button" href="/#iletisim">Görüşme talep edin</a>
+        <a class="button ghost" href={site.mapsHref}>Yol tarifi</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sec { font-size: var(--step-l); color: var(--accent); margin-bottom: 24px; }
+
+  .intro { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(32px, 4vw, 64px) clamp(56px, 6vw, 88px); }
+  .intro h1 { font-size: var(--step-xl); color: var(--accent); }
+  .lead { margin: 20px 0 16px; font-size: 21px; line-height: 1.5; max-width: 44ch; }
+  .intro-copy p:not(.lead) { max-width: 60ch; }
+  .intro-ph img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+
+  .team { padding-bottom: clamp(64px, 7vw, 104px); }
+  .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .person { display: grid; grid-template-columns: 220px 1fr; gap: 28px; background: var(--paper); padding: 16px; }
+  .person-ph { background: var(--accent); display: grid; place-items: center; aspect-ratio: 4 / 5; }
+  .person-ph span { font-size: 56px; color: var(--surface); letter-spacing: .04em; }
+  .person-copy { padding: 10px 10px 10px 0; display: grid; gap: 8px; align-content: start; }
+  .person h3 { font-size: 30px; color: var(--accent); line-height: 1.1; }
+  .person-bar { color: var(--muted); font-size: 16px; }
+  .person dl { margin: 14px 0 0; display: grid; gap: 10px; }
+  .person dl > div { display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
+  .person dt { color: var(--muted); font-size: var(--step-s); padding-top: 2px; }
+  .person dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+  .person dd a { text-decoration-color: transparent; color: var(--accent); }
+
+  .principles { background: var(--accent); color: var(--bg); padding-block: clamp(56px, 6vw, 88px); }
+  .principles .sec { color: var(--bg); }
+  .pr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .pr-grid li { display: grid; gap: 10px; align-content: start; }
+  .pr-grid h3 { font-size: 26px; line-height: 1.15; }
+  .pr-grid p { color: #ecdccb; font-size: 16px; }
+
+  .office { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(64px, 7vw, 104px); }
+  .office-ph img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+  .office dl { margin: 0; display: grid; gap: 14px; }
+  .office dl > div { display: grid; grid-template-columns: 160px 1fr; gap: 16px; align-items: baseline; }
+  .office dt { color: var(--muted); font-size: var(--step-s); }
+  .office dd { margin: 0; font: 600 24px/1.3 var(--display); }
+  .office dd a { text-decoration-color: transparent; }
+  .office-note { margin: 22px 0 26px; color: var(--muted); }
+  .office-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .office-actions .ghost { color: var(--accent); }
+
+  @media (max-width: 1100px) {
+    .team-grid { grid-template-columns: 1fr; }
+    .pr-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 800px) {
+    .intro, .office { grid-template-columns: 1fr; }
+    .intro-ph { order: -1; }
+  }
+  @media (max-width: 560px) {
+    .person { grid-template-columns: 1fr; }
+    .person-ph { aspect-ratio: 3 / 1; }
+    .person dl > div, .office dl > div { grid-template-columns: 1fr; gap: 2px; }
+    .pr-grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,211 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticles } from '../../lib/articles';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('alanlar')).sort((a, b) => a.data.order - b.data.order);
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry, all } }));
+}
+
+interface Props { entry: CollectionEntry<'alanlar'>; all: CollectionEntry<'alanlar'>[] }
+const { entry, all } = Astro.props;
+const a = entry.data;
+const { Content } = await render(entry);
+
+// Resources in the same area, matched by name.
+const petitions = (await getCollection('dilekceler')).filter((d) => d.data.category === a.name);
+const articles = (await getArticles()).filter((x) => x.data.area === a.name).slice(0, 3);
+const others = all.filter((x) => x.id !== entry.id);
+
+const steps = [
+  ['İlk görüşme', 'Durumunuzu dinliyor, belgelerinize göz atıyor ve işlemesi gereken süreleri hemen belirliyoruz.'],
+  ['İnceleme ve yol haritası', 'Dosyanızı ayrıntılı inceliyor; hangi yolun izlenebileceğini, olası sonuçları ve masrafları açıkça anlatıyoruz.'],
+  ['Vekalet ve başvuru', 'Vekaletnamenizi aldıktan sonra dilekçeleri hazırlıyor, ilgili mahkeme ya da kurum nezdinde başvuruyu yapıyoruz.'],
+  ['Takip ve bilgilendirme', 'Duruşmalara katılıyor, dosyadaki her gelişmeyi size bildiriyor ve süreç sonuçlanana kadar takip ediyoruz.'],
+];
+
+const faqLd = a.faqs.length && {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: a.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+<Base title={`${a.name} · Alanya Avukatlık · NKM Hukuk Bürosu`} description={a.summary}>
+  {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
+
+  <section class="hero wrap">
+    <div class="hero-copy" data-rise>
+      <nav class="crumbs" aria-label="Konum"><a class="link" href="/calisma-alanlari">Çalışma alanları</a> <span aria-hidden="true">/</span> {a.name}</nav>
+      <h1 class="display">{a.name}</h1>
+      <p class="lead">{a.summary}</p>
+      <div class="hero-actions">
+        <a class="button" href="/#iletisim">Görüşme talep edin</a>
+        {petitions.length > 0 && <a class="button ghost" href="#kaynaklar">Dilekçe örnekleri</a>}
+      </div>
+    </div>
+    <div class="hero-ph" data-rise style="--i:1">
+      <Image src={a.image} alt={a.imageAlt} widths={[500, 800, 1100]} sizes="(max-width: 900px) 92vw, 44vw" quality={74} loading="eager" />
+    </div>
+  </section>
+
+  <section class="intro wrap" aria-label="Giriş">
+    <div class="prose" data-rise><Content /></div>
+  </section>
+
+  <section class="services wrap" aria-labelledby="sv-title">
+    <h2 id="sv-title" class="display sec" data-rise>Hangi konularda yardımcı oluyoruz?</h2>
+    <ul class="sv-grid">
+      {a.services.map((s, i) => (
+        <li data-rise style={`--i:${i % 3}`}>
+          <h3 class="display">{s.title}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="process" aria-labelledby="pr-title">
+    <div class="wrap">
+      <h2 id="pr-title" class="display sec" data-rise>Süreç nasıl işler?</h2>
+      <ol class="pr-grid">
+        {steps.map(([t, d], i) => (
+          <li data-rise style={`--i:${i}`}>
+            <h3 class="display">{t}</h3>
+            <p>{d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  {a.faqs.length > 0 && (
+    <section class="faq wrap" aria-labelledby="faq-title">
+      <h2 id="faq-title" class="display sec" data-rise>Sık sorulan sorular</h2>
+      <div class="faq-list" data-rise>
+        {a.faqs.map((f, i) => (
+          <details open={i === 0}>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {(petitions.length > 0 || articles.length > 0) && (
+    <section class="res wrap" id="kaynaklar" aria-labelledby="res-title">
+      <h2 id="res-title" class="display sec" data-rise>Bu alandaki kaynaklar</h2>
+      {petitions.length > 0 && (
+        <ul class="pet">
+          {petitions.map((p) => (
+            <li>
+              <a href={`/dilekce-ornekleri/${p.id}`}>
+                <span class="pet-title display">{p.data.title}</span>
+                <span class="pet-time">Süre: {p.data.deadline.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {articles.length > 0 && <div class="art-grid">{articles.map((x) => <ArticleCard article={x} />)}</div>}
+    </section>
+  )}
+
+  <section class="ask">
+    <div class="wrap ask-in" data-rise>
+      <h2 class="display">{a.name} alanında bir sorununuz mu var?</h2>
+      <p>Durumunuzu kısaca anlatın; sürelerinizi kontrol edelim ve doğru adımı birlikte belirleyelim.</p>
+      <a class="button light" href="/#iletisim">Görüşme talep edin</a>
+    </div>
+  </section>
+
+  <section class="others wrap" aria-labelledby="ot-title">
+    <h2 id="ot-title" class="display sec">Diğer çalışma alanları</h2>
+    <ul>{others.map((o) => <li><a href={`/calisma-alanlari/${o.id}`}>{o.data.name}</a></li>)}</ul>
+  </section>
+</Base>
+
+<style>
+  .sec { font-size: var(--step-l); color: var(--accent); margin-bottom: 24px; }
+  .crumbs { font-size: var(--step-s); color: var(--muted); margin-bottom: 22px; }
+  .crumbs a { color: var(--accent); text-decoration-color: transparent; }
+
+  .hero { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(24px, 3vw, 48px) clamp(40px, 5vw, 64px); }
+  .hero h1 { font-size: var(--step-xl); color: var(--accent); }
+  .lead { margin: 20px 0 32px; font-size: 20px; max-width: 46ch; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-actions .ghost { color: var(--accent); }
+  .hero-ph img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; max-height: 340px; }
+
+  .intro { padding-bottom: clamp(40px, 5vw, 64px); }
+  .prose { font-size: 18px; line-height: 1.7; columns: 2; column-gap: clamp(32px, 5vw, 80px); }
+  @media (max-width: 900px) { .prose { columns: 1; } }
+  .prose :global(p) { margin: 0 0 1em; }
+
+  .services { padding-bottom: clamp(64px, 7vw, 104px); }
+  .sv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .sv-grid li { background: var(--paper); padding: 22px 24px; display: grid; gap: 8px; align-content: start; }
+  .sv-grid h3 { font-size: 24px; color: var(--accent); }
+  .sv-grid p { color: var(--ink); font-size: 16px; }
+
+  .process { background: var(--accent); color: var(--bg); padding-block: clamp(56px, 6vw, 88px); }
+  .process .sec { color: var(--bg); }
+  .pr-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; counter-reset: st; }
+  .pr-grid li { counter-increment: st; display: grid; gap: 10px; align-content: start; }
+  .pr-grid li::before { content: counter(st); font: 600 var(--step-l)/1 var(--display); color: var(--surface); }
+  .pr-grid h3 { font-size: 26px; }
+  .pr-grid p { color: #ecdccb; }
+
+  .faq { padding-block: clamp(64px, 7vw, 104px); }
+  .faq-list { display: grid; gap: 10px; }
+  .faq details { background: var(--paper); }
+  .faq summary {
+    cursor: pointer; list-style: none; padding: 18px 24px; display: flex; justify-content: space-between; gap: 20px;
+    font: 600 22px/1.25 var(--display); color: var(--ink);
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: '+'; font-family: var(--text); font-weight: 300; color: var(--accent); flex: none; transition: transform var(--t-hover) ease; }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq details p { padding: 0 28px 24px; max-width: 90ch; }
+
+  .res { padding-bottom: clamp(64px, 7vw, 104px); }
+  .pet { display: grid; gap: 10px; margin-bottom: 48px; }
+  .pet a { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: var(--paper); padding: 18px 24px; text-decoration: none; color: var(--ink); }
+  .pet-title { font-size: 24px; }
+  .pet-time { flex: none; background: #fdecea; color: #8c1d16; font-weight: 600; font-size: var(--step-s); padding: 6px 10px; border-left: 4px solid #b3261e; }
+  @media (hover: hover) and (pointer: fine) { .pet a:hover .pet-title { color: var(--accent); } }
+  .art-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+
+  .ask { background: var(--paper); }
+  .ask-in { padding-block: clamp(56px, 7vw, 96px); display: grid; grid-template-columns: 1fr auto; gap: 16px 48px; align-items: center; }
+  .ask h2 { font-size: var(--step-l); color: var(--accent); }
+  .ask p { grid-column: 1; max-width: 56ch; }
+  .ask .button { grid-column: 2; grid-row: 1 / 3; background: var(--accent); color: var(--on-accent); }
+
+  .others { padding-block: clamp(56px, 7vw, 96px); }
+  .others ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .others a { display: flex; min-height: 64px; align-items: center; justify-content: space-between; padding: 0 24px; background: var(--paper); color: var(--ink); text-decoration: none; font: 600 22px/1.2 var(--display); }
+  .others a::after { content: '→'; font-family: var(--text); font-weight: 300; color: var(--accent); }
+  @media (max-width: 900px) { .others ul { grid-template-columns: 1fr; } }
+  @media (hover: hover) and (pointer: fine) { .others a:hover { background: var(--accent); color: var(--on-accent); } }
+
+  @media (max-width: 1000px) {
+    .sv-grid, .art-grid { grid-template-columns: 1fr 1fr; }
+    .pr-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 700px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-ph { order: -1; }
+    .hero-ph img { aspect-ratio: 3 / 2; }
+    .sv-grid, .art-grid, .pr-grid { grid-template-columns: 1fr; }
+    .faq summary { font-size: 21px; padding: 18px 20px; }
+    .faq details p { padding: 0 20px 20px; }
+    .pet a { flex-direction: column; align-items: start; }
+    .pet-title { font-size: 21px; }
+    .ask-in { grid-template-columns: 1fr; }
+    .ask .button { grid-column: 1; grid-row: auto; justify-self: start; }
+  }
+</style>

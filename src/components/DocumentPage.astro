@@ -1,0 +1,146 @@
+---
+// Shared layout for a sample document (petition or power of attorney): summary, a side column with
+// downloads and facts, how-to steps, the text set as a sheet of paper, a disclaimer and a call to action.
+// The "side" slot goes at the top of the side column (the deadline box, the notary box ...).
+import { marked } from 'marked';
+import Base from '../layouts/Base.astro';
+import { expandParts } from '../lib/parcalar.mjs';
+
+interface Props {
+  title: string;
+  summary: string;
+  crumb: { href: string; label: string; current: string };
+  /** The document text in Markdown; [ ... ] marks a blank to fill in. */
+  body: string;
+  /** Download path without extension, e.g. /indir/dilekce/odeme-emrine-itiraz */
+  download: string;
+  steps: string[];
+  stepsTitle?: string;
+  textTitle: string;
+  facts: { label: string; value: string }[];
+  disclaimer: string;
+  help: { title: string; text: string };
+}
+const { title, summary, crumb, body, download, steps, stepsTitle = 'Nasıl kullanılır?', textTitle, facts, disclaimer, help } = Astro.props;
+
+// Same Markdown as the downloads; blanks are marked so they stand out on the page.
+const sheet = (await marked.parse(expandParts(body))).replace(/\[([^\]<>]*)\]/g, '<mark>[$1]</mark>')
+  // The page already has its own h1; inside the sheet the first line is a paragraph and section titles are h3.
+  .replace(/<h1>(.*?)<\/h1>/, '<p class="addr">$1</p>')
+  .replace(/<h2>(.*?)<\/h2>/g, '<h3>$1</h3>');
+---
+<Base title={`${title} · NKM Hukuk Bürosu`} description={summary}>
+  <article class="wrap page">
+    <nav class="crumbs" aria-label="Konum">
+      <a class="link" href={crumb.href}>{crumb.label}</a> <span aria-hidden="true">/</span> {crumb.current}
+    </nav>
+
+    <header class="head" data-rise>
+      <h1 class="display">{title}</h1>
+      <p class="summary">{summary}</p>
+    </header>
+
+    <div class="layout">
+      <aside class="side" data-rise style="--i:1">
+        <slot name="side" />
+        <div class="downloads">
+          <a class="button" href={`${download}.docx`} download>Word olarak indir</a>
+          <a class="button ghost" href={`${download}.pdf`} download>PDF olarak indir</a>
+        </div>
+        <dl class="facts">
+          {facts.map((f) => <div><dt>{f.label}</dt><dd>{f.value}</dd></div>)}
+        </dl>
+      </aside>
+
+      <div class="main">
+        <section class="how" aria-labelledby="how-title" data-rise style="--i:2">
+          <h2 id="how-title" class="display">{stepsTitle}</h2>
+          <ol>{steps.map((s) => <li>{s}</li>)}</ol>
+        </section>
+
+        <section aria-labelledby="text-title" data-rise>
+          <div class="text-bar">
+            <h2 id="text-title" class="display">{textTitle}</h2>
+            <button class="button ghost copy" type="button" data-copy>Metni kopyala</button>
+          </div>
+          <div class="paper" id="paper" set:html={sheet} />
+        </section>
+
+        <p class="disclaimer">{disclaimer}</p>
+
+        <div class="help" data-rise>
+          <h2 class="display">{help.title}</h2>
+          <p>{help.text}</p>
+          <a class="button light" href="/#iletisim">Görüşme talep edin</a>
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<script>
+  // Copy the document as plain text, keeping paragraph breaks.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const text = document.querySelector<HTMLElement>('#paper')?.innerText ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = 'Kopyalandı';
+      } catch {
+        btn.textContent = 'Kopyalanamadı; metni seçip kopyalayın';
+      }
+      setTimeout(() => (btn.textContent = 'Metni kopyala'), 2400);
+    });
+  });
+</script>
+
+<style>
+  .page { padding-block: clamp(28px, 4vw, 56px) var(--section-gap); }
+  .crumbs { font-size: var(--step-s); color: var(--muted); }
+  .crumbs a { color: var(--accent); text-decoration-color: transparent; }
+  .head { margin: 28px 0 48px; max-width: 900px; }
+  .head h1 { font-size: var(--step-xl); color: var(--accent); }
+  .summary { margin-top: 18px; font-size: 20px; max-width: 60ch; }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: clamp(32px, 4vw, 64px); align-items: start; }
+  .side { position: sticky; top: 24px; display: grid; gap: 24px; }
+  .facts { margin: 0; display: grid; gap: 14px; }
+  .facts dt { font-size: var(--step-s); color: var(--muted); }
+  .facts dd { margin: 2px 0 0; font-weight: 500; }
+  .downloads { display: grid; gap: 10px; }
+  .downloads .button { justify-content: center; }
+  .downloads .ghost, .copy { color: var(--accent); }
+
+  .main { display: grid; gap: 56px; min-width: 0; }
+  .how { background: var(--paper); padding: 28px 32px; }
+  .how h2, .text-bar h2 { font-size: 32px; color: var(--accent); }
+  .how ol { margin-top: 14px; padding-left: 1.3em; list-style: decimal; display: grid; gap: 8px; }
+  .text-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+  .copy { min-height: 44px; }
+
+  /* The document as a sheet of paper, set like the download. */
+  .paper {
+    background: #fff; color: #111; padding: clamp(28px, 6vw, 72px) clamp(22px, 6vw, 80px);
+    font: 17px/1.75 'Times New Roman', Tinos, Times, serif;
+  }
+  .paper :global(.addr) { font-weight: 700; text-align: center; margin-bottom: 2.2em; }
+  .paper :global(h3) { font-size: inherit; font-weight: 700; margin: 1.6em 0 .4em; }
+  .paper :global(p) { margin: 0 0 .7em; text-align: justify; }
+  .paper :global(ol) { list-style: none; padding: 0; counter-reset: p; }
+  .paper :global(ol li) { counter-increment: p; text-indent: 2em; text-align: justify; margin-bottom: .7em; }
+  .paper :global(ol li::before) { content: counter(p) '. '; }
+  .paper :global(ol li p) { display: inline; }
+  .paper :global(blockquote) { margin: 2.5em 0 0 auto; width: max-content; max-width: 100%; text-align: center; }
+  .paper :global(blockquote p) { margin: 0; text-align: center; }
+  .paper :global(mark) { background: #fff1a8; color: inherit; padding: 0 .1em; }
+
+  .disclaimer { font-size: var(--step-s); color: var(--muted); max-width: 72ch; }
+  .help { background: var(--accent); color: var(--bg); padding: clamp(28px, 4vw, 48px); display: grid; gap: 14px; justify-items: start; }
+  .help h2 { font-size: var(--step-l); }
+  .help p { color: #ecdccb; }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    .side { position: static; }
+  }
+</style>

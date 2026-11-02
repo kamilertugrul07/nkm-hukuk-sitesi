@@ -1,0 +1,45 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import DocumentPage from '../../components/DocumentPage.astro';
+
+export async function getStaticPaths() {
+  const all = await getCollection('dilekceler');
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<'dilekceler'> }
+const { entry } = Astro.props;
+const d = entry.data;
+const updated = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(d.updated);
+---
+<DocumentPage
+  title={d.title}
+  summary={d.summary}
+  crumb={{ href: '/dilekce-ornekleri', label: 'Dilekçe örnekleri', current: d.category }}
+  body={entry.body ?? ''}
+  download={`/indir/dilekce/${entry.id}`}
+  steps={d.steps}
+  textTitle="Dilekçe metni"
+  facts={[
+    { label: 'Verileceği yer', value: d.authority },
+    { label: 'Dayanak', value: d.law },
+    { label: 'Güncelleme', value: updated },
+  ]}
+  disclaimer="Bu örnek genel bilgilendirme amaçlıdır ve hukuki danışmanlık yerine geçmez. Her dosyanın koşulları farklıdır; dilekçeyi vermeden önce kendi durumunuza uygun olup olmadığını bir avukatla değerlendirmeniz önerilir."
+  help={{ title: 'Bu süreçte avukat desteği ister misiniz?', text: 'Tebligatınızı ve dosyanızı inceleyelim, süreniz dolmadan doğru adımı birlikte atalım.' }}
+>
+  <div class="deadline" role="note" slot="side">
+    <p class="deadline-k">Süre</p>
+    <p class="deadline-v display">{d.deadline.label}</p>
+    <p>{d.deadline.detail}</p>
+    <a class="link" href="/#sureler">Son gününüzü hesaplayın</a>
+  </div>
+</DocumentPage>
+
+<style>
+  .deadline { background: #fdecea; border-left: 6px solid #b3261e; padding: 22px 24px; color: #5c1410; }
+  .deadline-k { font-weight: 600; color: #b3261e; }
+  .deadline-v { font-size: var(--step-l); color: #8c1d16; margin: 2px 0 10px; }
+  .deadline p:not(.deadline-k):not(.deadline-v) { font-size: 16px; }
+  .deadline a { display: inline-block; margin-top: 12px; color: #8c1d16; font-weight: 600; text-decoration-color: currentColor; }
+</style>

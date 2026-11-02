@@ -1,0 +1,113 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import dilekce from '../../assets/img/dilekce.png';
+
+const all = (await getCollection('dilekceler')).sort((a, b) => a.data.order - b.data.order);
+// Group by category, keeping the order of first appearance.
+const groups = [...new Set(all.map((d) => d.data.category))].map((cat) => ({
+  cat, items: all.filter((d) => d.data.category === cat),
+}));
+---
+<Base
+  title="Dilekçe Örnekleri · NKM Hukuk Bürosu"
+  description="Ödeme emrine itiraz başta olmak üzere sık kullanılan dilekçe örnekleri. Sayfada okuyun, Word veya PDF olarak indirin."
+>
+  <section class="intro wrap">
+    <div class="intro-copy" data-rise>
+      <h1 class="display">Dilekçe örnekleri</h1>
+      <p>
+        Sık ihtiyaç duyulan dilekçeleri sayfada okuyabilir, Word ya da PDF olarak indirebilirsiniz.
+        Sarıyla işaretli yerleri kendi bilgilerinizle doldurmanız yeterli.
+      </p>
+      <p class="intro-warn">
+        Her dilekçenin bir süresi vardır. Süre kaçarsa hakkınızı kaybedebilirsiniz; emin değilseniz bize danışın.
+      </p>
+    </div>
+    <div class="intro-ph" data-rise style="--i:1">
+      <Image src={dilekce} alt="Masada dolma kalem ve mühür mumu ile bir dilekçe kâğıdı" widths={[480, 760]} sizes="(max-width: 800px) 92vw, 40vw" quality={72} loading="eager" />
+    </div>
+  </section>
+
+  <section class="list wrap" aria-label="Dilekçeler">
+    {groups.map((g) => (
+      <div class="group" data-rise>
+        <h2 class="display">{g.cat}</h2>
+        <ul>
+          {g.items.map((d) => (
+            <li class="item">
+              <div class="item-main">
+                <h3 class="display"><a href={`/dilekce-ornekleri/${d.id}`}>{d.data.title}</a></h3>
+                <p>{d.data.summary}</p>
+              </div>
+              <p class="item-time"><span>Süre</span><strong>{d.data.deadline.label}</strong></p>
+              <div class="item-actions">
+                <a class="button" href={`/dilekce-ornekleri/${d.id}`}>İncele</a>
+                <a class="button ghost" href={`/indir/dilekce/${d.id}.docx`} download>Word</a>
+                <a class="button ghost" href={`/indir/dilekce/${d.id}.pdf`} download>PDF</a>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="ask">
+    <div class="wrap ask-in" data-rise>
+      <h2 class="display">Aradığınız dilekçeyi bulamadınız mı?</h2>
+      <p>Durumunuzu kısaca yazın; hangi dilekçeye ihtiyacınız olduğunu ve sürenizi birlikte belirleyelim.</p>
+      <a class="button light" href="/#iletisim">Bize yazın</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .intro {
+    display: grid; grid-template-columns: 7fr 5fr; gap: clamp(32px, 5vw, 80px); align-items: center;
+    padding-block: clamp(40px, 6vw, 96px) clamp(72px, 8vw, 120px);
+  }
+  .intro h1 { font-size: var(--step-xl); color: var(--accent); }
+  .intro-copy p { margin-top: 22px; max-width: 52ch; }
+  .intro-warn {
+    padding: 14px 18px; background: #fdecea; color: #8c1d16; border-left: 6px solid #b3261e; font-weight: 500;
+  }
+  .intro-ph img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; max-height: 560px; }
+
+  .list { padding-bottom: var(--section-gap); display: grid; gap: 72px; }
+  .group h2 { font-size: var(--step-l); color: var(--accent); margin-bottom: 20px; }
+  .group ul { display: grid; gap: 14px; }
+  .item {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 28px; align-items: center;
+    background: var(--paper); padding: 28px 32px;
+  }
+  .item h3 { font-size: 30px; }
+  @media (max-width: 600px) { .item h3 { font-size: 26px; } }
+  .item h3 a { text-decoration: none; color: var(--ink); }
+  .item h3 a:hover { color: var(--accent); }
+  .item-main p { margin-top: 8px; color: var(--muted); max-width: 70ch; }
+  .item-time { display: grid; justify-items: center; padding: 10px 18px; background: #fdecea; border-left: 6px solid #b3261e; color: #8c1d16; }
+  .item-time span { font-size: var(--step-s); }
+  .item-time strong { font: 600 26px/1.1 var(--display); }
+  .item-actions { display: flex; gap: 10px; }
+  .item-actions .ghost { color: var(--accent); }
+  @media (hover: hover) and (pointer: fine) { .item-actions .ghost:hover { background: var(--bg); } }
+
+  .ask { background: var(--accent); color: var(--bg); }
+  .ask-in { padding-block: clamp(64px, 8vw, 110px); display: grid; grid-template-columns: 1fr auto; gap: 16px 48px; align-items: center; }
+  .ask h2 { font-size: var(--step-l); }
+  .ask p { grid-column: 1; color: #ecdccb; max-width: 56ch; }
+  .ask .button { grid-column: 2; grid-row: 1 / 3; }
+
+  @media (max-width: 900px) {
+    .intro { grid-template-columns: 1fr; }
+    .intro-ph { order: -1; }
+    .intro-ph img { aspect-ratio: 3 / 2; }
+    .item { grid-template-columns: 1fr auto; }
+    .item-main { grid-column: 1 / -1; }
+    .item-actions { flex-wrap: wrap; }
+    .ask-in { grid-template-columns: 1fr; }
+    .ask .button { grid-column: 1; grid-row: auto; justify-self: start; }
+  }
+</style>

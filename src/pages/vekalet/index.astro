@@ -1,0 +1,188 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { site, attorneys } from '../../data/site';
+import vekaletImg from '../../assets/img/vekalet.png';
+
+const samples = (await getCollection('vekaletler')).sort((a, b) => a.data.order - b.data.order);
+// The text a client reads to the notary, one block per attorney.
+const notaryText = (a: (typeof attorneys)[number]) => `${a.name}, ${a.bar}, Sicil No: ${a.sicil}, ${site.address}`;
+---
+<Base
+  title="Vekalet · NKM Hukuk Bürosu"
+  description="Avukatlarımıza noterden nasıl vekalet verilir, hangi belgeler gerekir, yurt dışından vekalet nasıl verilir? Örnek vekaletnameleri Word ve PDF olarak indirin."
+>
+  <section class="intro wrap">
+    <div class="intro-copy" data-rise>
+      <h1 class="display">Vekalet</h1>
+      <p>
+        Sizi mahkemede, icra dairesinde ya da tapuda temsil edebilmemiz için noterden vekaletname vermeniz gerekir.
+        Bu sayfada nasıl verileceğini, yanınıza neleri almanız gerektiğini ve örnek vekaletnameleri bulabilirsiniz.
+      </p>
+      <a class="button" href="#ornekler">Örnek vekaletnameler</a>
+    </div>
+    <div class="intro-ph" data-rise style="--i:1">
+      <Image src={vekaletImg} alt="Pirinç saplı bir mühür ve kurdeleyle bağlanmış belgeler" widths={[480, 760]} sizes="(max-width: 800px) 92vw, 40vw" quality={72} loading="eager" />
+    </div>
+  </section>
+
+  <!-- How to give us a power of attorney, with the details the notary asks for -->
+  <section class="give wrap" aria-labelledby="give-title">
+    <div class="give-steps" data-rise>
+      <h2 id="give-title" class="display">Bize vekalet vermek için</h2>
+      <ol>
+        <li><strong>Herhangi bir notere gidin.</strong> Alanya’da ya da Türkiye’nin her yerinde verebilirsiniz; genellikle randevu gerekmez.</li>
+        <li><strong>Kimliğinizi götürün.</strong> T.C. kimlik kartı, ehliyet ya da pasaport yeterlidir.</li>
+        <li><strong>Avukat bilgilerimizi notere iletin.</strong> Yandaki bilgileri kopyalayıp telefonunuzdan gösterebilirsiniz.</li>
+        <li><strong>Vekaletin türünü söyleyin.</strong> Çoğu iş için genel dava vekaletnamesi yeterlidir; boşanma ve tapu işleri özel vekalet ister.</li>
+        <li><strong>Vekaletnameyi bize ulaştırın.</strong> Aslını büromuza getirebilir ya da noterin onaylı örneğini gönderebilirsiniz.</li>
+      </ol>
+      <p class="fee">Noter harç ve ücretini noter belirler ve size orada tahsil eder; avukatlık ücretine dahil değildir.</p>
+    </div>
+    <div class="cards" data-rise style="--i:1">
+      {attorneys.map((a) => (
+        <div class="attorney">
+          <p class="attorney-name display">{a.name}</p>
+          <dl>
+            <div><dt>Baro</dt><dd>{a.bar}</dd></div>
+            <div><dt>Sicil no</dt><dd>{a.sicil}</dd></div>
+            <div><dt>Büro adresi</dt><dd>{site.address}</dd></div>
+          </dl>
+          <button class="button ghost" type="button" data-copy={notaryText(a)}>Bilgileri kopyala</button>
+        </div>
+      ))}
+      <p class="cards-note">Vekaletnameyi iki avukatımıza birlikte vermeniz önerilir; böylece biri müsait olmadığında diğeri işinizi takip edebilir.</p>
+    </div>
+  </section>
+
+  <!-- Documents and the abroad route -->
+  <section class="info wrap" aria-label="Belgeler ve yurt dışından vekalet">
+    <div class="info-box" data-rise>
+      <h2 class="display">Yanınıza almanız gerekenler</h2>
+      <ul>
+        <li>Geçerli kimlik belgesi (T.C. kimlik kartı, ehliyet ya da pasaport)</li>
+        <li>Tapu işlemleri için: son altı ayda çekilmiş vesikalık fotoğraf ve taşınmazın ada / parsel bilgileri</li>
+        <li>Yabancı uyrukluysanız: pasaport ve Türkçe bilmiyorsanız noterin kabul ettiği yeminli tercüman</li>
+        <li>Şirket adına vekalet veriyorsanız: imza sirküleri ve güncel ticaret sicil gazetesi</li>
+      </ul>
+    </div>
+    <div class="info-box dark" data-rise style="--i:1">
+      <h2 class="display">Yurt dışından vekalet</h2>
+      <p>Türkiye dışında yaşıyorsanız vekaleti iki yoldan verebilirsiniz:</p>
+      <ul>
+        <li><strong>Türk konsolosluğunda:</strong> Konsoloslukta verilen vekaletname Türkiye’de doğrudan geçerlidir; ek onay gerekmez.</li>
+        <li><strong>Bulunduğunuz ülkenin noterinde:</strong> Vekaletnameye apostil şerhi aldırılması ve Türkiye’de yeminli tercümeyle Türkçeye çevrilip noter onayı yaptırılması gerekir.</li>
+      </ul>
+      <p>Hangi yolun sizin için daha hızlı olduğunu öğrenmek için bize yazın.</p>
+    </div>
+  </section>
+
+  <!-- Samples -->
+  <section class="samples wrap" id="ornekler" aria-labelledby="samples-title">
+    <h2 id="samples-title" class="display" data-rise>Örnek vekaletnameler</h2>
+    <ul>
+      {samples.map((v) => (
+        <li class="item" data-rise>
+          <div class="item-main">
+            <h3 class="display"><a href={`/vekalet/${v.id}`}>{v.data.title}</a></h3>
+            <p><span class="item-kind">{v.data.kind}.</span> {v.data.summary}</p>
+          </div>
+          <div class="item-actions">
+            <a class="button" href={`/vekalet/${v.id}`}>İncele</a>
+            <a class="button ghost" href={`/indir/vekalet/${v.id}.docx`} download>Word</a>
+            <a class="button ghost" href={`/indir/vekalet/${v.id}.pdf`} download>PDF</a>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="ask">
+    <div class="wrap ask-in" data-rise>
+      <h2 class="display">Hangi vekaletin gerektiğinden emin değil misiniz?</h2>
+      <p>Notere gitmeden önce bize yazın; işiniz için hangi yetkilerin gerektiğini söyleyelim.</p>
+      <a class="button light" href="/#iletisim">Bize yazın</a>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Copy one attorney's details for the notary.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    const label = btn.textContent;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy ?? '');
+        btn.textContent = 'Kopyalandı';
+      } catch {
+        btn.textContent = 'Kopyalanamadı';
+      }
+      setTimeout(() => (btn.textContent = label), 2400);
+    });
+  });
+</script>
+
+<style>
+  .intro {
+    display: grid; grid-template-columns: 7fr 5fr; gap: clamp(32px, 5vw, 80px); align-items: center;
+    padding-block: clamp(40px, 6vw, 96px) clamp(72px, 8vw, 120px);
+  }
+  .intro h1 { font-size: var(--step-xl); color: var(--accent); }
+  .intro-copy p { margin: 22px 0 32px; max-width: 52ch; }
+  .intro-ph img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; max-height: 560px; }
+
+  .give { display: grid; grid-template-columns: 6fr 5fr; gap: clamp(32px, 5vw, 80px); align-items: start; padding-bottom: var(--section-gap); }
+  .give h2, .samples h2 { font-size: var(--step-l); color: var(--accent); }
+  .give ol { margin-top: 24px; padding-left: 1.3em; list-style: decimal; display: grid; gap: 14px; }
+  .give li strong { font-weight: 600; }
+  .fee { margin-top: 24px; color: var(--muted); font-size: var(--step-s); }
+  .cards { display: grid; gap: 16px; }
+  .attorney { background: var(--paper); padding: 26px 28px; display: grid; gap: 14px; }
+  .attorney-name { font-size: 28px; color: var(--accent); }
+  .attorney dl { margin: 0; display: grid; gap: 8px; }
+  .attorney dl > div { display: grid; grid-template-columns: 110px 1fr; gap: 12px; }
+  .attorney dt { color: var(--muted); font-size: var(--step-s); padding-top: 2px; }
+  .attorney dd { margin: 0; font-weight: 500; }
+  .attorney .button { justify-self: start; color: var(--accent); min-height: 44px; }
+  .cards-note { color: var(--muted); font-size: var(--step-s); }
+
+  .info { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-bottom: var(--section-gap); }
+  .info-box { background: var(--paper); padding: clamp(28px, 3.5vw, 48px); display: grid; gap: 16px; align-content: start; }
+  .info-box h2 { font-size: var(--step-l); color: var(--accent); }
+  .info-box ul { display: grid; gap: 12px; }
+  .info-box li { padding-left: 1.1em; position: relative; }
+  .info-box li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
+  .info-box.dark { background: var(--accent); color: var(--bg); }
+  .info-box.dark h2 { color: var(--bg); }
+  .info-box.dark li::before { color: var(--surface); }
+  .info-box.dark p { color: #ecdccb; }
+
+  .samples { padding-bottom: var(--section-gap); }
+  .samples ul { margin-top: 24px; display: grid; gap: 14px; }
+  .item { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; background: var(--paper); padding: 28px 32px; }
+  .item-kind { font-weight: 600; color: var(--accent); }
+  .item h3 { font-size: 30px; }
+  .item h3 a { text-decoration: none; color: var(--ink); }
+  .item h3 a:hover { color: var(--accent); }
+  .item-main > p { margin-top: 8px; color: var(--muted); max-width: 70ch; }
+  .item-actions { display: flex; gap: 10px; }
+  .item-actions .ghost { color: var(--accent); }
+
+  .ask { background: var(--accent); color: var(--bg); }
+  .ask-in { padding-block: clamp(64px, 8vw, 110px); display: grid; grid-template-columns: 1fr auto; gap: 16px 48px; align-items: center; }
+  .ask h2 { font-size: var(--step-l); }
+  .ask p { grid-column: 1; color: #ecdccb; max-width: 56ch; }
+  .ask .button { grid-column: 2; grid-row: 1 / 3; }
+
+  @media (max-width: 900px) {
+    .intro, .give, .info { grid-template-columns: 1fr; }
+    .intro-ph { order: -1; }
+    .intro-ph img { aspect-ratio: 3 / 2; }
+    .item { grid-template-columns: 1fr; }
+    .item-actions { flex-wrap: wrap; }
+    .item h3 { font-size: 26px; }
+    .ask-in { grid-template-columns: 1fr; }
+    .ask .button { grid-column: 1; grid-row: auto; justify-self: start; }
+  }
+</style>

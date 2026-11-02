@@ -1,0 +1,61 @@
+---
+// A legal text (KVKK notice, disclaimer) from the `yasal` collection: title, last update, contents and prose.
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { formatDate } from '../lib/articles';
+
+interface Props { id: string }
+const entry = await getEntry('yasal', Astro.props.id);
+if (!entry) throw new Error(`Yasal metin bulunamadı: ${Astro.props.id}`);
+const d = entry.data;
+const { Content, headings } = await render(entry);
+const toc = headings.filter((h) => h.depth === 2);
+---
+<Base title={`${d.title} · NKM Hukuk Bürosu`} description={d.description}>
+  <article class="wrap legal">
+    <header class="legal-head" data-rise>
+      <h1 class="display">{d.title}</h1>
+      <p class="lead">{d.description}</p>
+      <p class="meta">Son güncelleme: {formatDate(d.updated)}</p>
+    </header>
+    <div class="legal-grid">
+      <aside class="toc" aria-labelledby="toc-title">
+        <p id="toc-title" class="toc-k">İçindekiler</p>
+        <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+      </aside>
+      <div class="prose"><Content /></div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .legal { padding-block: clamp(32px, 4vw, 64px) clamp(72px, 8vw, 120px); }
+  .legal-head { max-width: 900px; margin-bottom: clamp(32px, 4vw, 56px); }
+  .legal-head h1 { font-size: var(--step-xl); color: var(--accent); }
+  .lead { margin-top: 16px; font-size: 19px; max-width: 62ch; }
+  .meta { margin-top: 12px; color: var(--muted); }
+  .legal-grid { display: grid; grid-template-columns: 260px minmax(0, 760px); gap: clamp(32px, 5vw, 96px); }
+  .toc { position: sticky; top: 24px; align-self: start; background: var(--paper); padding: 22px 24px; }
+  .toc-k { font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+  .toc ol { display: grid; gap: 10px; list-style: none; padding: 0; font-size: 16px; }
+  .toc a { color: var(--muted); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  .prose { font-size: 17px; line-height: 1.75; }
+  .prose :global(p) { margin: 0 0 1.1em; }
+  .prose :global(h2) { font: 600 30px/1.15 var(--display); color: var(--accent); margin: 1.6em 0 .5em; scroll-margin-top: 24px; }
+  .prose :global(h2:first-child) { margin-top: 0; }
+  .prose :global(ul), .prose :global(ol) { margin: 0 0 1.2em; padding-left: 1.3em; display: grid; gap: .45em; }
+  .prose :global(ul) { list-style: disc; }
+  .prose :global(ol) { list-style: decimal; }
+  .prose :global(li::marker) { color: var(--accent); }
+  .prose :global(a) { color: var(--accent); text-underline-offset: .18em; }
+  .prose :global(strong) { font-weight: 600; }
+  .prose :global(blockquote) { margin: 1.4em 0; padding: 18px 22px; background: #fdecea; border-left: 6px solid #b3261e; color: #5c1410; }
+  .prose :global(blockquote p) { margin: 0; }
+
+  @media (max-width: 1000px) {
+    .legal-grid { grid-template-columns: minmax(0, 1fr); }
+    .toc { position: static; }
+  }
+</style>

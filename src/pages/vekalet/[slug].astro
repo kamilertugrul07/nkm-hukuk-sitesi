@@ -1,0 +1,45 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import DocumentPage from '../../components/DocumentPage.astro';
+
+export async function getStaticPaths() {
+  const all = await getCollection('vekaletler');
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<'vekaletler'> }
+const { entry } = Astro.props;
+const d = entry.data;
+const updated = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(d.updated);
+---
+<DocumentPage
+  title={d.title}
+  summary={d.summary}
+  crumb={{ href: '/vekalet', label: 'Vekalet', current: d.kind }}
+  body={entry.body ?? ''}
+  download={`/indir/vekalet/${entry.id}`}
+  steps={d.steps}
+  stepsTitle="Noterde nasıl verilir?"
+  textTitle="Vekaletname metni"
+  facts={[
+    { label: 'Nerede verilir', value: d.where },
+    { label: 'Güncelleme', value: updated },
+  ]}
+  disclaimer="Bu örnek, noterde hazırlanacak vekaletnamenin neleri içermesi gerektiğini göstermek içindir. Noter metni kendi standart formunda düzenler. Genel bilgilendirme amaçlıdır ve hukuki danışmanlık yerine geçmez."
+  help={{ title: 'Vekaletnamenizi birlikte hazırlayalım', text: 'Hangi yetkilerin gerektiğinden emin değilseniz notere gitmeden önce bize danışın; eksik yetki yüzünden işiniz yarım kalmasın.' }}
+>
+  <div class="needs" slot="side">
+    <p class="needs-k">Yanınıza alın</p>
+    <ul>{d.documents.map((x) => <li>{x}</li>)}</ul>
+    {d.note && <p class="needs-note">{d.note}</p>}
+  </div>
+</DocumentPage>
+
+<style>
+  .needs { background: var(--paper); border-left: 6px solid var(--accent); padding: 22px 24px; }
+  .needs-k { font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+  .needs ul { display: grid; gap: 8px; font-size: 16px; }
+  .needs li { padding-left: 1.1em; position: relative; }
+  .needs li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
+  .needs-note { margin-top: 14px; padding: 12px 14px; background: #fdecea; color: #8c1d16; font-size: 15px; font-weight: 500; }
+</style>

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.taste-skill/
+.DS_Store
+public/indir/
+.env
+
+# Raw source images (optimised copies live in src/assets); keep only the photo credits.
+assets/*
+!assets/credits.json
